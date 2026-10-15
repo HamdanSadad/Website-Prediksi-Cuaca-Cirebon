@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="hero-section">
+    <div class="hero-text">
+        <h1>Prediksi Polusi Udara Kota Cirebon</h1>
+        <p>Aplikasi ini memprediksi tingkat PM2.5 menggunakan model machine learning XGBoost dengan fitur waktu lanjutan, memperkirakan kualitas udara 6 jam dan 24 jam ke depan.</p>
+    </div>
+    <div class="hero-card" id="current-status-card">
+        <h3>Status Saat Ini</h3>
+        <div class="status-content">
+            <div class="pm-value">
+                <span id="current-pm-value">--</span>
+                <span class="unit">µg/m³</span>
+            </div>
+            <span class="badge" id="current-badge">Menunggu Input</span>
+        </div>
+        <p class="timestamp-info" id="current-time">Silakan isi form prediksi</p>
+    </div>
+</section>
+
+<section class="prediction-layout fade-in" style="display: flex; flex-direction: column; gap: 40px; margin-bottom: 60px;">
+    <!-- Centered Form Container -->
+    <div class="form-container card" style="max-width: 800px; width: 100%; margin: 0 auto; border-top: 4px solid var(--primary); text-align: center;">
+        <h2 style="margin-bottom: 20px; color: var(--primary);">Form Input Prediksi Otomatis</h2>
+        <form id="prediction-form" style="max-width: 500px; margin: 0 auto; text-align: center;">
+            <div class="form-group" style="text-align: left;">
+                <label for="datetime" style="font-size: 1.1rem;">Tanggal & Jam Pengamatan</label>
+                <input type="datetime-local" id="datetime" name="datetime" required style="font-size: 1.1rem; padding: 14px;">
+            </div>
+            
+            <button type="submit" class="btn-primary" id="btn-predict" style="margin-top: 30px; font-size: 1.1rem;">
+                <span id="btn-text">Ambil Data & Prediksi Sekarang</span>
+                <span id="btn-loading" class="hidden">Memproses...</span>
+            </button>
+        </form>
+        
+        <div id="error-message" class="error-notification hidden" style="max-width: 500px; margin: 20px auto;"></div>
+    </div>
+
+    <div class="results-container" style="width: 100%;">
+        <h2>Hasil Prediksi</h2>
+        <div class="cards-grid" style="grid-template-columns: repeat(3, 1fr);">
+            
+            <!-- Current Status Card -->
+            <div class="card result-card" id="card-current">
+                <h3>Saat Ini</h3>
+                <div class="pm-value">
+                    <span id="val-current">--</span>
+                    <span class="unit">µg/m³</span>
+                </div>
+                <span class="badge" id="badge-current">Belum Tersedia</span>
+                <p class="forecast-note" id="note-current" style="margin-top:16px; font-size: 0.85rem; color: var(--text-muted); min-height: 42px;">-</p>
+            </div>
+            
+            <!-- T+6 Card -->
+            <div class="card result-card" id="card-t6">
+                <h3>6 Jam Ke Depan</h3>
+                <div class="pm-value">
+                    <span id="t6-value">--</span>
+                    <span class="unit">µg/m³</span>
+                </div>
+                <span class="badge" id="t6-badge">Belum Tersedia</span>
+                <p class="recommendation" id="t6-recommendation">-</p>
+            </div>
+            
+            <div class="card result-card" id="card-t24">
+                <h3>24 Jam Ke Depan</h3>
+                <div class="pm-value">
+                    <span id="t24-value">--</span>
+                    <span class="unit">µg/m³</span>
+                </div>
+                <span class="badge" id="t24-badge">Belum Tersedia</span>
+                <p class="recommendation" id="t24-recommendation">-</p>
+            </div>
+        </div>
+        
+        <div class="chart-container card">
+            <h3>Trend Prediksi PM2.5</h3>
+            <canvas id="predictionChart"></canvas>
+        </div>
+    </div>
+</section>
+
+<section id="about" class="about-section card">
+    <h2>Tentang Model & Data</h2>
+    <div class="about-grid">
+        <div class="about-item">
+            <h3>Sumber Data</h3>
+            <p>Menggunakan data PM2.5 Kota Cirebon tahun 2023. Model bersifat multivariat dengan memanfaatkan parameter meteorologi berupa Suhu, Kelembapan, Curah Hujan, dan Kecepatan Angin.</p>
+        </div>
+        <div class="about-item">
+            <h3>Proses Preprocessing</h3>
+            <p>Data melewati tahap interpolasi <i>time-based</i> untuk mengatasi nilai yang hilang. <i>Feature engineering</i> lanjutan diaplikasikan termasuk fitur lag, rolling statistics, sin/cos siklikal, dan deteksi lonjakan (spike flag).</p>
+        </div>
+        <div class="about-item">
+            <h3>Arsitektur Model</h3>
+            <p>Menggunakan algoritma <strong>XGBoost Regressor</strong> yang dituning hyperparameter-nya melalui <strong>Optuna</strong>. Menghasilkan performa terbaik untuk horizon forecasting t+6 dan t+24 pada eksperimen FullFeatures.</p>
+        </div>
+    </div>
+    <div class="disclaimer">
+        <strong>Penting:</strong> Hasil prediksi ini merupakan perkiraan berdasarkan algoritma <i>machine learning</i>, dan bukan data resmi dari BMKG atau KLHK. Aplikasi ini dibuat eksklusif untuk tujuan edukasi dan demonstrasi integrasi model.
+    </div>
+</section>
+{% endblock %}
